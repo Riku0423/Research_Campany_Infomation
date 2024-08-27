@@ -88,6 +88,39 @@ export function CompanyAnalysis() {
     })
   }
 
+  const handleCopyAll = () => {
+    if (!companyData) return
+
+    const allText = `
+会社名: ${companyData.companyName}
+
+会社概要:
+本社住所: ${companyData['本社住所']}
+電話番号: ${companyData['電話番号']}
+社長: ${companyData['社長']}
+従業員数: ${companyData['従業員数']}
+売上: ${companyData['売上']}
+
+事業内容:
+事業１: ${companyData['事業１']}
+${companyData['事業１の説明']}
+
+事業２: ${companyData['事業２']}
+${companyData['事業２の説明']}
+
+事業３: ${companyData['事業３']}
+${companyData['事業３の説明']}
+
+主要クライアント:
+${Array.isArray(companyData['クライアント']) ? companyData['クライアント'].join('\n') : ''}
+
+最近のニュース:
+${Array.isArray(companyData['最近のニュース']) ? companyData['最近のニュース'].join('\n') : ''}
+    `.trim()
+
+    handleCopy(allText)
+  }
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-background">
       <div className="max-w-4xl w-full px-6 py-8 bg-card rounded-lg shadow-lg">
@@ -119,6 +152,10 @@ export function CompanyAnalysis() {
         {companyData && (
           <div className="mt-8 space-y-6" ref={resultRef}>
             <h2 className="text-2xl font-bold mb-4 text-card-foreground">{companyData.companyName}</h2>
+            <Button onClick={handleCopyAll} className="w-full mb-4">
+              <Clipboard className="w-4 h-4 mr-2" />
+              全体をコピー
+            </Button>
             <Card>
               <CardHeader>
                 <CardTitle>会社概要</CardTitle>
