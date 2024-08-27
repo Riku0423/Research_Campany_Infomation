@@ -1,4 +1,4 @@
-import { CompanyAnalysis } from "@/components/component/ResearchInfomation";
+import CompanyAnalysis from "@/components/component/ResearchInfomation";
 import Image from "next/image";
 
 export default function Home() {
