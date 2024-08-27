@@ -1,10 +1,9 @@
-import CompanyAnalysis from "@/components/component/ResearchInfomation";
-import Image from "next/image";
+import Component from "@/components/component/ResearchInfomation";
 
 export default function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <CompanyAnalysis />
+      <Component />
     </main>
   );
 }
