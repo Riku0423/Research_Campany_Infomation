@@ -17,25 +17,35 @@ interface CompanyData {
 }
 
 const fetchCompanyData = async (url: string): Promise<CompanyData> => {
-  const response = await fetch(DIFY_API_URL, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${API_KEY}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      inputs: { url },
-      response_mode: "blocking",
-      user: "user-123"
-    })
-  });
+  console.log("APIリクエスト開始:", url);
+  try {
+    const response = await fetch(DIFY_API_URL, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        inputs: { url },
+        response_mode: "blocking",
+        user: "user-123"
+      })
+    });
 
-  if (!response.ok) {
-    throw new Error(`APIリクエストが失敗しました: ${response.status}`);
+    console.log("APIレスポンス受信:", response.status);
+
+    if (!response.ok) {
+      throw new Error(`APIリクエストが失敗しました: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log("APIレスポンスデータ:", data);
+
+    return parseCompanyData(data.data.outputs.text);
+  } catch (error) {
+    console.error("API呼び出し中にエラーが発生しました:", error);
+    throw error;
   }
-
-  const data = await response.json();
-  return parseCompanyData(data.data.outputs.text);
 };
 
 const parseCompanyData = (text: string): CompanyData => {
@@ -44,6 +54,7 @@ const parseCompanyData = (text: string): CompanyData => {
   try {
     data = JSON.parse(text);
     data.companyName = data.companyName || '';
+    console.log("JSONパース成功:", data);
   } catch (error) {
     console.error("JSONのパースに失敗しました:", error);
     data = { companyName: '' };
@@ -63,19 +74,24 @@ export default function Component() {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    console.log("フォーム送信開始:", url);
     try {
       const data = await fetchCompanyData(url);
+      console.log("データ取得成功:", data);
       setCompanyData(data);
     } catch (err) {
       console.error("エラー発生:", err);
       setError(err instanceof Error ? err.message : "不明なエラーが発生しました。");
     } finally {
       setLoading(false);
+      console.log("処理完了");
     }
   };
 
   const handleCopy = (text: string) => {
+    console.log("コピー開始:", text);
     navigator.clipboard.writeText(text).then(() => {
+      console.log("コピー成功");
       alert('コピーしました。')
     }).catch(err => {
       console.error('コピーに失敗しました:', err)
@@ -84,6 +100,7 @@ export default function Component() {
 
   const handleCopyAll = () => {
     if (!companyData) return
+    console.log("全体コピー開始");
 
     const allText = `
 会社名: ${companyData.companyName || '不明'}
