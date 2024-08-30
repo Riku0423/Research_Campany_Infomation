@@ -16,6 +16,42 @@ interface CompanyData {
   [key: string]: string | string[] | null;
 }
 
+const fetchCompanyData = async (url: string): Promise<CompanyData> => {
+  const response = await fetch(DIFY_API_URL, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${API_KEY}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      inputs: { url },
+      response_mode: "blocking",
+      user: "user-123"
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error(`APIリクエストが失敗しました: ${response.status}`);
+  }
+
+  const data = await response.json();
+  return parseCompanyData(data.data.outputs.text);
+};
+
+const parseCompanyData = (text: string): CompanyData => {
+  console.log("データパース開始:", text);
+  let data: CompanyData;
+  try {
+    data = JSON.parse(text);
+    data.companyName = data.companyName || '';
+  } catch (error) {
+    console.error("JSONのパースに失敗しました:", error);
+    data = { companyName: '' };
+  }
+  console.log("パース完了:", data);
+  return data;
+};
+
 export default function Component() {
   const [url, setUrl] = useState("")
   const [loading, setLoading] = useState(false)
@@ -24,50 +60,19 @@ export default function Component() {
   const resultRef = useRef<HTMLDivElement>(null)
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    setLoading(true)
-    setError(null)
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
     try {
-      console.log("APIリクエスト開始:", url)
-      const response = await fetch(DIFY_API_URL, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${API_KEY}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          inputs: { url },
-          response_mode: "blocking",
-          user: "user-123"
-        })
-      })
-      console.log("APIレスポンス受信")
-      const data = await response.json()
-      console.log("APIレスポンスデータ:", data)
-      const parsedData = parseCompanyData(data.data.outputs.text)
-      console.log("パース済みデータ:", parsedData)
-      setCompanyData(parsedData)
+      const data = await fetchCompanyData(url);
+      setCompanyData(data);
     } catch (err) {
-      console.error("エラー発生:", err)
-      setError("分析中にエラーが発生しました。")
+      console.error("エラー発生:", err);
+      setError(err instanceof Error ? err.message : "不明なエラーが発生しました。");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
-
-  const parseCompanyData = (text: string): CompanyData => {
-    console.log("データパース開始:", text);
-    let data: CompanyData;
-    try {
-      data = JSON.parse(text);
-      data.companyName = data.companyName || ''; // companyNameが存在しない場合は空文字を設定
-    } catch (error) {
-      console.error("JSONのパースに失敗しました:", error);
-      data = { companyName: '' };
-    }
-    console.log("パース完了:", data);
-    return data;
-  }
+  };
 
   const handleCopy = (text: string) => {
     navigator.clipboard.writeText(text).then(() => {
@@ -134,7 +139,11 @@ ${Array.isArray(companyData['最新のニュース']) ? companyData['最新の�
               className="w-full text-lg"
             />
           </div>
-          <Button type="submit" className="w-full text-lg h-12 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 transition-all duration-300" disabled={loading}>
+          <Button 
+            type="submit" 
+            className="w-full text-lg h-12 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 transition-all duration-300" 
+            disabled={loading}
+          >
             {loading ? (
               <div className="flex items-center justify-center">
                 <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white mr-2"></div>
