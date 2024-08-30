@@ -9,7 +9,7 @@ import { Clipboard, Building2, Phone, User, Users, DollarSign, Briefcase, Users2
 import { motion, AnimatePresence } from "framer-motion"
 
 const DIFY_API_URL = "https://api.dify.ai/v1/workflows/run"
-const API_KEY = "app-k9aLSlsu3pdZwS437ksuP0pd"
+const API_KEY = "app-d4wNT5VuxkoaenitAMZndjOk"
 
 interface CompanyData {
   companyName: string;
