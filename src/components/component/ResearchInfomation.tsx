@@ -13,7 +13,7 @@ const API_KEY = "app-d4wNT5VuxkoaenitAMZndjOk"
 
 interface CompanyData {
   companyName: string;
-  [key: string]: string | string[];
+  [key: string]: string | string[] | null;
 }
 
 export default function Component() {
@@ -56,29 +56,17 @@ export default function Component() {
   }
 
   const parseCompanyData = (text: string): CompanyData => {
-    console.log("データパース開始:", text)
-    const lines = text.split('\n')
-    const data: CompanyData = { companyName: '' }
-    let currentKey = ''
-
-    lines.forEach(line => {
-      if (line.startsWith('##')) {
-        data.companyName = line.replace('##', '').trim()
-      } else if (line.startsWith('#')) {
-        currentKey = line.replace('#', '').trim()
-        data[currentKey] = ''
-      } else if (line.trim() !== '') {
-        if (currentKey === 'クライアント' || currentKey === '最近のニュース') {
-          if (!Array.isArray(data[currentKey])) data[currentKey] = [] as string[]
-          (data[currentKey] as string[]).push(line.replace('*', '').trim())
-        } else {
-          data[currentKey] = (data[currentKey] as string) + line.trim()
-        }
-      }
-    })
-
-    console.log("パース完了:", data)
-    return data
+    console.log("データパース開始:", text);
+    let data: CompanyData;
+    try {
+      data = JSON.parse(text);
+      data.companyName = data.companyName || ''; // companyNameが存在しない場合は空文字を設定
+    } catch (error) {
+      console.error("JSONのパースに失敗しました:", error);
+      data = { companyName: '' };
+    }
+    console.log("パース完了:", data);
+    return data;
   }
 
   const handleCopy = (text: string) => {
@@ -93,30 +81,30 @@ export default function Component() {
     if (!companyData) return
 
     const allText = `
-会社名: ${companyData.companyName}
+会社名: ${companyData.companyName || '不明'}
 
 会社概要:
-本社住所: ${companyData['本社住所']}
-電話番号: ${companyData['電話番号']}
-社長: ${companyData['社長']}
-従業員数: ${companyData['従業員数']}
-売上: ${companyData['売上']}
+本社住所: ${companyData['本社住所'] || '不明'}
+電話番号: ${companyData['電話番号'] || '不明'}
+社長: ${companyData['社長'] || '不明'}
+従業員数: ${companyData['従業員数'] || '不明'}
+売上: ${companyData['売上'] || '不明'}
 
 事業内容:
-事業１: ${companyData['事業１']}
-${companyData['事業１の説明']}
+事業１: ${companyData['事業１'] || '不明'}
+${companyData['事業１の説明'] || '説明なし'}
 
-事業２: ${companyData['事業２']}
-${companyData['事業２の説明']}
+事業２: ${companyData['事業２'] || '不明'}
+${companyData['事業２の説明'] || '説明なし'}
 
-事業３: ${companyData['事業３']}
-${companyData['事業３の説明']}
+事業３: ${companyData['事業３'] || '不明'}
+${companyData['事業３の説明'] || '説明なし'}
 
 主要クライアント:
-${Array.isArray(companyData['クライアント']) ? companyData['クライアント'].join('\n') : ''}
+${Array.isArray(companyData['取引先や主要顧客・プロジェクト事例']) ? companyData['取引先や主要顧客・プロジェクト事例'].join('\n') : companyData['取引先や主要顧客・プロジェクト事例'] || '情報なし'}
 
 最近のニュース:
-${Array.isArray(companyData['最近のニュース']) ? companyData['最近のニュース'].join('\n') : ''}
+${Array.isArray(companyData['最新のニュース']) ? companyData['最新のニュース'].join('\n') : companyData['最新のニュース'] || '最新のニュースはありません'}
     `.trim()
 
     handleCopy(allText)
@@ -179,7 +167,7 @@ ${Array.isArray(companyData['最近のニュース']) ? companyData['最近の�
             className="mt-8 space-y-6" 
             ref={resultRef}
           >
-            <h2 className="text-3xl font-bold mb-4 text-center text-gray-800">{companyData.companyName}</h2>
+            <h2 className="text-3xl font-bold mb-4 text-center text-gray-800">{companyData.companyName || '企業名不明'}</h2>
             <Button onClick={handleCopyAll} className="w-full mb-4 bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 transition-all duration-300">
               <Clipboard className="w-5 h-5 mr-2" />
               全体をコピー
@@ -193,15 +181,15 @@ ${Array.isArray(companyData['最近のニュース']) ? companyData['最近の�
               </CardHeader>
               <CardContent className="p-6">
                 <div className="space-y-3">
-                  <div className="flex items-center"><Building2 className="w-5 h-5 mr-2 text-gray-600" /><span className="font-medium">本社住所:</span> <span className="ml-2">{companyData['本社住所']}</span></div>
-                  <div className="flex items-center"><Phone className="w-5 h-5 mr-2 text-gray-600" /><span className="font-medium">電話番号:</span> <span className="ml-2">{companyData['電話番号']}</span></div>
-                  <div className="flex items-center"><User className="w-5 h-5 mr-2 text-gray-600" /><span className="font-medium">社長:</span> <span className="ml-2">{companyData['社長']}</span></div>
-                  <div className="flex items-center"><Users className="w-5 h-5 mr-2 text-gray-600" /><span className="font-medium">従業員数:</span> <span className="ml-2">{companyData['従業員数']}</span></div>
-                  <div className="flex items-center"><DollarSign className="w-5 h-5 mr-2 text-gray-600" /><span className="font-medium">売上:</span> <span className="ml-2">{companyData['売上']}</span></div>
+                  <div className="flex items-center"><Building2 className="w-5 h-5 mr-2 text-gray-600" /><span className="font-medium">本社住所:</span> <span className="ml-2">{companyData['本社住所'] || '不明'}</span></div>
+                  <div className="flex items-center"><Phone className="w-5 h-5 mr-2 text-gray-600" /><span className="font-medium">電話番号:</span> <span className="ml-2">{companyData['電話番号'] || '不明'}</span></div>
+                  <div className="flex items-center"><User className="w-5 h-5 mr-2 text-gray-600" /><span className="font-medium">社長:</span> <span className="ml-2">{companyData['社長'] || '不明'}</span></div>
+                  <div className="flex items-center"><Users className="w-5 h-5 mr-2 text-gray-600" /><span className="font-medium">従業員数:</span> <span className="ml-2">{companyData['従業員数'] || '不明'}</span></div>
+                  <div className="flex items-center"><DollarSign className="w-5 h-5 mr-2 text-gray-600" /><span className="font-medium">売上:</span> <span className="ml-2">{companyData['売上'] || '不明'}</span></div>
                 </div>
               </CardContent>
               <CardFooter className="bg-gray-50">
-                <Button onClick={() => handleCopy(`本社住所: ${companyData['本社住所']}\n電話番号: ${companyData['電話番号']}\n社長: ${companyData['社長']}\n従業員数: ${companyData['従業員数']}\n売上: ${companyData['売上']}`)} className="ml-auto bg-purple-500 hover:bg-purple-600">
+                <Button onClick={() => handleCopy(`本社住所: ${companyData['本社住所'] || '不明'}\n電話番号: ${companyData['電話番号'] || '不明'}\n社長: ${companyData['社長'] || '不明'}\n従業員数: ${companyData['従業員数'] || '不明'}\n売上: ${companyData['売上'] || '不明'}`)} className="ml-auto bg-purple-500 hover:bg-purple-600">
                   <Clipboard className="w-4 h-4 mr-2" />
                   コピー
                 </Button>
@@ -218,14 +206,14 @@ ${Array.isArray(companyData['最近のニュース']) ? companyData['最近の�
                 <div className="space-y-4">
                   {['事業１', '事業２', '事業３'].map((business, index) => (
                     <div key={index} className="bg-white p-4 rounded-lg shadow">
-                      <h3 className="font-medium text-lg text-blue-700 mb-2">{companyData[business]}</h3>
-                      <p className="text-gray-600">{companyData[`${business}の説明`]}</p>
+                      <h3 className="font-medium text-lg text-blue-700 mb-2">{companyData[business] || `${business}：不明`}</h3>
+                      <p className="text-gray-600">{companyData[`${business}の説明`] || '説明なし'}</p>
                     </div>
                   ))}
                 </div>
               </CardContent>
               <CardFooter className="bg-gray-50">
-                <Button onClick={() => handleCopy(`事業１: ${companyData['事業１']}\n${companyData['事業１の説明']}\n\n事業２: ${companyData['事業２']}\n${companyData['事業２の説明']}\n\n事業３: ${companyData['事業３']}\n${companyData['事業３の説明']}`)} className="ml-auto bg-blue-500 hover:bg-blue-600">
+                <Button onClick={() => handleCopy(`事業１: ${companyData['事業１'] || '不明'}\n${companyData['事業１の説明'] || '説明なし'}\n\n事業２: ${companyData['事業２'] || '不明'}\n${companyData['事業２の説明'] || '説明なし'}\n\n事業３: ${companyData['事業３'] || '不明'}\n${companyData['事業３の説明'] || '説明なし'}`)} className="ml-auto bg-blue-500 hover:bg-blue-600">
                   <Clipboard className="w-4 h-4 mr-2" />
                   コピー
                 </Button>
@@ -240,13 +228,16 @@ ${Array.isArray(companyData['最近のニュース']) ? companyData['最近の�
               </CardHeader>
               <CardContent className="p-6">
                 <ul className="list-disc list-inside space-y-2">
-                  {Array.isArray(companyData['クライアント']) && companyData['クライアント'].map((client, index) => (
-                    <li key={index} className="text-gray-700">{client}</li>
-                  ))}
+                  {Array.isArray(companyData['取引先や主要顧客・プロジェクト事例']) ? 
+                    companyData['取引先や主要顧客・プロジェクト事例'].map((client, index) => (
+                      <li key={index} className="text-gray-700">{client}</li>
+                    )) : 
+                    <li className="text-gray-700">{companyData['取引先や主要顧客・プロジェクト事例'] || '情報なし'}</li>
+                  }
                 </ul>
               </CardContent>
               <CardFooter className="bg-gray-50">
-                <Button onClick={() => handleCopy(Array.isArray(companyData['クライアント']) ? companyData['クライアント'].join('\n') : '')} className="ml-auto bg-green-500 hover:bg-green-600">
+                <Button onClick={() => handleCopy(Array.isArray(companyData['取引先や主要顧客・プロジェクト事例']) ? companyData['取引先や主要顧客・プロジェクト事例'].join('\n') : companyData['取引先や主要顧客・プロジェクト事例'] || '情報なし')} className="ml-auto bg-green-500 hover:bg-green-600">
                   <Clipboard className="w-4 h-4 mr-2" />
                   コピー
                 </Button>
@@ -261,13 +252,16 @@ ${Array.isArray(companyData['最近のニュース']) ? companyData['最近の�
               </CardHeader>
               <CardContent className="p-6">
                 <ul className="space-y-3">
-                  {Array.isArray(companyData['最近のニュース']) && companyData['最近のニュース'].map((news, index) => (
-                    <li key={index} className="bg-white p-3 rounded-lg shadow text-gray-700">{news}</li>
-                  ))}
+                {Array.isArray(companyData['最新のニュース']) ? 
+                    companyData['最新のニュース'].map((news, index) => (
+                      <li key={index} className="bg-white p-3 rounded-lg shadow text-gray-700">{news}</li>
+                    )) : 
+                    <li className="bg-white p-3 rounded-lg shadow text-gray-700">{companyData['最新のニュース'] || '最新のニュースはありません'}</li>
+                  }
                 </ul>
               </CardContent>
               <CardFooter className="bg-gray-50">
-                <Button onClick={() => handleCopy(Array.isArray(companyData['最近のニュース']) ? companyData['最近のニュース'].join('\n') : '')} className="ml-auto bg-yellow-500 hover:bg-yellow-600">
+                <Button onClick={() => handleCopy(Array.isArray(companyData['最新のニュース']) ? companyData['最新のニュース'].join('\n') : companyData['最新のニュース'] || '最新のニュースはありません')} className="ml-auto bg-yellow-500 hover:bg-yellow-600">
                   <Clipboard className="w-4 h-4 mr-2" />
                   コピー
                 </Button>
