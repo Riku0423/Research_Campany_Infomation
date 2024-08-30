@@ -176,9 +176,6 @@ ${Array.isArray(companyData['最新のニュース']) ? companyData['最新の�
         className="max-w-4xl w-full px-6 py-8 bg-white rounded-lg shadow-xl"
       >
         <h1 className="text-4xl font-bold mb-6 text-center bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-indigo-600">企業情報分析</h1>
-        {companyData && companyData['企業名'] && (
-          <h2 className="text-2xl font-semibold mb-4 text-center text-gray-800">{companyData['企業名']}</h2>
-        )}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <Label htmlFor="url" className="block mb-2 text-lg font-medium text-gray-700">
