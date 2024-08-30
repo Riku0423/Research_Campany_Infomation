@@ -52,7 +52,20 @@ const parseCompanyData = (text: string): CompanyData => {
   console.log("データパース開始:", text);
   let data: CompanyData;
   try {
-    data = JSON.parse(text);
+    // JSONデータの部分を抽出
+    const jsonMatch = text.match(/```json\n([\s\S]*?)\n```/);
+    if (!jsonMatch) {
+      throw new Error("JSONデータが見つかりません");
+    }
+    let jsonString = jsonMatch[1].trim();
+    
+    // 不正な制御文字を除去
+    jsonString = jsonString.replace(/[\u0000-\u001F\u007F-\u009F]/g, "");
+    
+    // エスケープされていない改行を適切にエスケープ
+    jsonString = jsonString.replace(/(?<!\\)\n/g, "\\n");
+    
+    data = JSON.parse(jsonString);
     data.companyName = data.companyName || '';
     console.log("JSONパース成功:", data);
   } catch (error) {
