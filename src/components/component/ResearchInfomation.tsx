@@ -1,7 +1,5 @@
-// 'use client' ディレクティブを使用して、このコンポーネントがクライアントサイドでレンダリングされることを指定
 'use client'
 
-// 必要なReactフックとコンポーネントをインポート
 import React, { useState, useRef } from "react"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
