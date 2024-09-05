@@ -9,8 +9,8 @@ import { Clipboard, Building2, Phone, User, Users, DollarSign, Briefcase, Users2
 import { motion, AnimatePresence } from "framer-motion"
 
 // Dify APIのURLとAPIキーを定義
-const DIFY_API_URL = "https://api.dify.ai/v1/workflows/run"
-const API_KEY = "app-d4wNT5VuxkoaenitAMZndjOk"
+const DIFY_API_URL = process.env.NEXT_PUBLIC_DIFY_API_URL || "https://api.dify.ai/v1/workflows/run"
+const API_KEY = process.env.NEXT_PUBLIC_DIFY_API_KEY
 
 // CompanyDataインターフェースを更新
 interface CompanyData {
@@ -324,7 +324,7 @@ ${Array.isArray(companyData['最新のニュース']) ? companyData['最新の�
                           <CardFooter className="bg-gray-50">
                             <Button onClick={() => handleCopy(Array.isArray(companyData['最新のニュース']) ? companyData['最新のニュース'].join('\n') : companyData['最新のニュース'] || '最新のニュースはありません')} className="ml-auto bg-yellow-500 hover:bg-yellow-600">
                               <Clipboard className="w-4 h-4 mr-2" />
-                              コピー
+                              ���ピー
                             </Button>
                           </CardFooter>
                         </Card>
